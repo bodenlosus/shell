@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 adw = { version = "0.7.1", package = "libadwaita", features = ["v1_5", "v1_6"] }
+async-channel = "2.3.1"
+cascade = "1.0.1"
+chrono = "0.4.40"
 gdk-pixbuf = "0.20.7"
 gtk = { version = "0.9.5", package = "gtk4", features = ["blueprint", "v4_16"] }
 
@@ -12,8 +15,6 @@ gtk4-layer-shell = "0.4.0"
 gtk4-sys = "0.9.5"
 libc = "0.2.169"
 niri-ipc = "25.2.0"
-relm4 = "0.9.1"
-relm4-components = "0.9.1"
 tokio = { version = "1.43.0", features = ["full"] }
 
 [build-dependencies]

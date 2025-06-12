@@ -1,0 +1,23 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $Center : Adw.Bin {
+    css-classes: ["panel-menu-button"];
+    
+    Gtk.MenuButton {
+
+        child: Gtk.Label time-label {
+                label: "";    
+        };
+        always-show-arrow: false;
+        direction: up;
+        popover: Gtk.Popover {
+            has-arrow: false;
+            
+            Gtk.Label {
+    
+                label: _("aaaa");
+            }
+        };
+    } 
+}

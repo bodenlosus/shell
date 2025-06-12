@@ -1,0 +1,11 @@
+.panel {
+    border-radius: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    background-color: var(--window-bg-color);
+}
+
+.panel-menu-button > menubutton > button {
+    background-color: transparent;
+}

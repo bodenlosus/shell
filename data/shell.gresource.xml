@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gresources>
+  <gresource prefix="/shell/ui">
+    <file
+      compressed="true"
+      preprocess="xml-stripblanks"
+      alias="panel.ui"
+    >ui/panel.ui</file>
+    <file
+      compressed="true"
+      preprocess="xml-stripblanks"
+      alias="center.ui"
+    >ui/center.ui</file>
+  </gresource>
+  <gresource prefix="/styles">
+    <file alias="style.css" compressed="true">style.css</file>
+  </gresource>
+</gresources>

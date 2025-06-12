@@ -27,6 +27,7 @@
             export GDK_PIXBUF_MODULE_FILE=${loaders}/loaders.cache
           '';
           packages = with pkgs; [
+            blueprint-compiler
             loaders
             gdk-pixbuf
             webp-pixbuf-loader

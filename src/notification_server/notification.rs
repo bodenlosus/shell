@@ -1,8 +1,4 @@
-use adw::subclass::prelude::ObjectSubclassIsExt;
-use gtk::glib::property::PropertySet;
-use gtk::glib::{self, clone, Object, WeakRef};
-use gtk::{CompositeTemplate, Label};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use gtk::glib::{self, Object};
 
 mod inner {
 

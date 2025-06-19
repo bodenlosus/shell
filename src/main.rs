@@ -1,12 +1,11 @@
 mod center;
-mod notifications;
+mod notification_server;
 mod panel;
 mod time;
-mod notification;
 mod utils;
 use adw::prelude::*;
-use gtk::{gio, glib::bitflags::Flags, CssProvider};
-
+use gtk::{gio, CssProvider};
+use notification_server::NotificationServer;
 const APP_ID: &'static str = "io.github.johannes.shell";
 const DATA_DIR: &'static str = "/home/johannes/bracket/data/";
 
@@ -18,24 +17,6 @@ fn main() -> () {
         load_css();
     });
     app.connect_activate(build_ui);
-
-    gtk::glib::spawn_future_local(async move {
-        let mut server = notifications::server::Server::new();
-        let r = server.take_reciever();
-        server.connect_to_dbus();
-        if let Some(r) = r {
-            while let Ok(event) = r.recv().await {
-                match event {
-                    notifications::server::NotificationEvent::Add(n) => {
-                        println!("{n:?}");
-                    }
-                    notifications::server::NotificationEvent::Close(id) => {
-                        println!("closed: {id}");
-                    }
-                }
-            }
-        }
-    });
     app.run();
 }
 
@@ -50,11 +31,13 @@ fn load_css() {
 }
 
 fn build_ui(app: &adw::Application) {
-    // let ic = gtk::IconTheme::default();
-    // println!("Theme Name: {}", ic.theme_name());
-    // println!("Icons: {:#?}, ", ic.icon_names());
-    // println!("HAS ICON: {}", ic.has_icon("hourglass-symbolic"));
-    let panel = panel::Panel::new(&app);
+    let server = NotificationServer::new();
+    let store = server.get_store();
+    store.connect_notify(name, |x, p| {});
+    let panel = panel::Panel::new(&app, Some(server.get_store()));
+    
+    server.connect_to_dbus();
+    
     panel.present();
 }
 

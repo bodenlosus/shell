@@ -1,6 +1,12 @@
+use adw::subclass::prelude::{ObjectSubclassExt, ObjectSubclassIsExt};
+use gio::Notification;
 use gtk::{gio, glib::{self, Object}, prelude::GtkWindowExt};
 
+use crate::notification_server::NotificationServer;
+
 mod inner { 
+    use std::cell::OnceCell;
+
     use crate::center::Center;
 
     use super::*;
@@ -14,7 +20,8 @@ mod inner {
     #[template(resource = "/shell/ui/panel.ui")]
     pub struct Panel {
         #[template_child(id="center")]
-        center: TemplateChild<Center>
+        pub center: TemplateChild<Center>,
+        pub notification_store: OnceCell<Option<gio::ListStore>>
     }
 
 
@@ -66,9 +73,14 @@ glib::wrapper! {
 }
 
 impl Panel {
-    pub fn new(app: &adw::Application) -> Self {
+    pub fn new(app: &adw::Application, store: Option<gio::ListStore>) -> Self {
         let obj: Panel = Object::new();
         obj.set_application(Some(app));
         obj
+    }
+
+    fn set_server(&self, store: Option<gio::ListStore>) {
+        let inner = self.imp();
+        inner.notification_store.set(store);
     }
 }

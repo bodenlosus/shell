@@ -1,8 +1,5 @@
-use adw::subclass::prelude::ObjectSubclassIsExt;
-use gtk::glib::property::PropertySet;
-use gtk::glib::{self, clone, Object, WeakRef};
-use gtk::{CompositeTemplate, Label};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use gtk::glib::{self, Object};
+use gtk::CompositeTemplate;
 
 mod inner {
 
@@ -12,7 +9,7 @@ mod inner {
         subclass::{prelude::*, widget::WidgetImpl},
     };
 
-    use crate::time;
+    use crate::{notification_server, time};
 
     use super::*;
     #[derive(CompositeTemplate, Default)]
@@ -25,6 +22,8 @@ mod inner {
 
         #[template_child(id="time-module")]
         pub time_mod: TemplateChild<time::TimeModule>,
+
+        server: Option<notification_server::NotificationServer>,
     }
 
     #[glib::object_subclass]

@@ -3,9 +3,23 @@
     margin-left: 5px;
     margin-right: 5px;
     margin-bottom: 5px;
-    background-color: var(--window-bg-color);
 }
 
-.panel-menu-button > menubutton > button {
+.panel-menu-bin > menubutton > button {
+        background-color: var(--window-bg-color);
+}
+
+.calendar * {
+}
+
+.calendar {
     background-color: transparent;
+    border: none;
+}
+
+.calendar > grid > label{
+    font-size: small;
+    font-weight: bolder;
+	padding: 0.6em 0px 0.6em 0px;
+	border-radius: 2.2em;
 }

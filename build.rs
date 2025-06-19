@@ -26,11 +26,8 @@ fn main() {
             None
         })
         .collect();
-    println!("{out_dir:?}");
     Command::new("blueprint-compiler")
         .args(&["batch-compile", format!("{out_dir}/data/ui").as_str(), "data/blp"])
-        .args(files)
-        .spawn()
-        .unwrap();
+        .args(files).status().unwrap();
     glib_build_tools::compile_resources(&["data/", &format!("{out_dir}/data/")], "data/shell.gresource.xml", "shell.gresource");
 }

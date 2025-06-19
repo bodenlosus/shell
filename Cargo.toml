@@ -10,7 +10,7 @@ cascade = "1.0.1"
 chrono = "0.4.40"
 gdk-pixbuf = "0.20.7"
 gtk = { version = "0.9.5", package = "gtk4", features = ["blueprint", "v4_16"] }
-
+gio = {version = "*", features = ["v2_74"]}
 gtk4-layer-shell = "0.4.0"
 gtk4-sys = "0.9.5"
 libc = "0.2.169"

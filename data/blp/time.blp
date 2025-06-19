@@ -1,0 +1,38 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $TimeModule: Gtk.Box {
+    orientation: vertical;
+    margin-top: 10;
+    margin-start: 20;
+    margin-end: 20;
+
+    Gtk.Label weekday-label {
+        label: "Tuesday";
+        halign: start;
+
+        css-classes: [
+            "title-4",
+            "dimmed",
+        ];
+    }
+
+    Gtk.Label date-label {
+        label: "March 17 2025";
+        halign: start;
+
+        css-classes: [
+            "title-2",
+            "dimmed",
+        ];
+    }
+
+    Gtk.Calendar calendar {
+        css-classes: [
+            "calendar",
+        ];
+
+        margin-top: 10;
+
+    }
+}

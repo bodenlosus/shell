@@ -2,21 +2,29 @@ use adw::subclass::prelude::ObjectSubclassIsExt;
 use gtk::glib::property::PropertySet;
 use gtk::glib::{self, clone, Object, WeakRef};
 use gtk::{CompositeTemplate, Label};
-use std::time::{SystemTime, Duration, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 mod inner {
 
     use adw::subclass::{bin::BinImpl, prelude::ObjectImplExt};
     use gtk::{
+        prelude::PopoverExt,
         subclass::{prelude::*, widget::WidgetImpl},
     };
+
+    use crate::time;
 
     use super::*;
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/shell/ui/center.ui")]
     pub struct Center {
-        #[template_child(id="time-label")]
+        #[template_child(id = "time-label")]
         pub time_label: TemplateChild<gtk::Label>,
+        #[template_child(id = "popover")]
+        pub popover: TemplateChild<gtk::Popover>,
+
+        #[template_child(id="time-module")]
+        pub time_mod: TemplateChild<time::TimeModule>,
     }
 
     #[glib::object_subclass]
@@ -32,7 +40,7 @@ mod inner {
         }
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
-                    }
+        }
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
             obj.init_template();
         }
@@ -42,8 +50,9 @@ mod inner {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = &self.obj();
-            super::Clock::attach_to_label(&obj.imp().time_label);
-
+            let imp = obj.imp();
+            imp.popover.set_offset(0, -10);
+            imp.time_mod.bind_time_to(&imp.time_label.get(), "label", "%x %X");
         }
     }
     impl BinImpl for Center {}
@@ -60,36 +69,5 @@ impl Center {
     pub fn new() -> Self {
         let obj = Object::new();
         obj
-    }
-}
-
-// TODO: use systime
-struct Clock;
-
-impl Clock {
-    pub fn new() -> Self {
-        Self
-    }
-
-    pub fn attach_to_label(label: &gtk::Label) {
-        Self::update_display(label);
-
-        glib::timeout_add_local(Duration::from_secs(1), clone!(
-            #[weak] label,
-            #[upgrade_or]
-            glib::ControlFlow::Continue,
-            move || {
-                Self::update_display(&label);
-                glib::ControlFlow::Continue
-            }
-        ));
-    }
-
-    pub fn update_display(label: &gtk::Label) {
-        let Ok(now) = glib::DateTime::now_local() else {return;};
-
-        let Ok(time_str) = now.format("%x | %X") else {return;};
-
-        label.set_text(&time_str);
     }
 }

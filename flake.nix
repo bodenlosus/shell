@@ -24,9 +24,11 @@
         # packages.default = pkgs.callPackage ./. {};  
         devShells.default = pkgs.mkShell {
           shellHook = ''
-            export GDK_PIXBUF_MODULE_FILE=${loaders}/loaders.cache
+            export 
+
           '';
           packages = with pkgs; [
+            gsettings-desktop-schemas
             blueprint-compiler
             loaders
             gdk-pixbuf
@@ -47,11 +49,21 @@
             rustPlatform.bindgenHook
             llvmPackages.libclang
         ];
+          
           env = {
+            "XDG_DATA_DIRS" = builtins.concatStringsSep ":" [
+                "${pkgs.gtk4}/share/gsettings-schemas/gtk4-${pkgs.gtk4.version}"
+                "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/gsettings-desktop-schemas-${pkgs.gsettings-desktop-schemas.version}"
+            ];
+            "GIO_EXTRA_MODULES" = builtins.concatStringsSep ":" [
+                "${pkgs.glib-networking}/lib/gio/modules"
+                "${pkgs.dconf}/lib/gio/modules"
+            ];
+
+            GDK_PIXBUF_MODULE_FILE="${loaders}/loaders.cache";
             LIBCLANG_PATH="${pkgs.llvmPackages.libclang.lib}";
             # BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.llvmPackages.libclang.lib}/lib/clang/${pkgs.lib.getVersion pkgs.clang}/include";
             RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
-            GDK_PIXBUF_MODULE_FILE = "${loaders}/loaders.cache";
           };
         };
       });

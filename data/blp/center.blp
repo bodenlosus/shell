@@ -1,23 +1,47 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $Center : Adw.Bin {
-    css-classes: ["panel-menu-button"];
-    
-    Gtk.MenuButton {
+template $Center: Adw.Bin {
+    css-classes: [
+        "panel-menu-bin",
+    ];
 
-        child: Gtk.Label time-label {
-                label: "";    
-        };
-        always-show-arrow: false;
-        direction: up;
-        popover: Gtk.Popover {
-            has-arrow: false;
-            
-            Gtk.Label {
-    
-                label: _("aaaa");
+    Gtk.MenuButton {
+        css-classes: [
+            "flat",
+        ];
+
+        child: Gtk.Box {
+            spacing: 5;
+            orientation: horizontal;
+
+            Gtk.Label time-label {
+                label: "";
             }
         };
-    } 
+
+        always-show-arrow: false;
+        direction: up;
+
+        popover: Gtk.Popover popover {
+            has-arrow: false;
+            height-request: 300;
+
+            Gtk.Box {
+                orientation: horizontal;
+                Gtk.Box {
+                    Label {
+                      label: _("a");
+                    }
+                }
+                
+                Gtk.Separator {
+                  orientation: vertical;
+                  opacity: 0.5;
+                }
+
+                $TimeModule time-module {}
+            }
+        };
+    }
 }

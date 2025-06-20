@@ -29,6 +29,7 @@ mod inner {
         #[property(get, set)]
         pub body: RefCell<String>,
 
+        # [property(get, set)]
         pub actions: RefCell<Vec<String>>,
 
         #[property(get, set, minimum = i32::MIN, maximum = i32::MAX, default = -1i32)]

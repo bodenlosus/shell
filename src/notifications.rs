@@ -22,6 +22,7 @@ mod inner {
 
         #[template_child(id = "weekday-label")]
         pub weekday_label: TemplateChild<gtk::Label>,
+        
         #[property(get, set)]
         pub datetime: RefCell<Option<glib::DateTime>>,
     }

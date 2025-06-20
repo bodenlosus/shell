@@ -1,5 +1,6 @@
 mod center;
 mod notification_server;
+mod notifications;
 mod panel;
 mod time;
 mod utils;
@@ -33,7 +34,10 @@ fn load_css() {
 fn build_ui(app: &adw::Application) {
     let server = NotificationServer::new();
     let store = server.get_store();
-    store.connect_notify(name, |x, p| {});
+    store.connect_items_changed(|list, position, removed ,added| {
+        let item = list.item(position);
+        println!("Item changed at position {}: {:?}", position, item);
+    });
     let panel = panel::Panel::new(&app, Some(server.get_store()));
     
     server.connect_to_dbus();

@@ -1,0 +1,80 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $Notification: Gtk.Box {
+  css-classes: [
+    "notification",
+  ];
+
+  orientation: horizontal;
+  spacing: 10;
+  width-request: 100;
+  overflow: visible;
+  margin-end: 100;
+  margin-top: 100;
+  margin-start: 100;
+  margin-bottom: 100;
+
+  Gtk.Picture picture {
+    vexpand: true;
+  }
+
+  Gtk.Box {
+    orientation: vertical;
+
+    Gtk.Box {
+      spacing: 8;
+
+      Gtk.Image {
+        icon-name: "display-brightness";
+        pixel-size: 12;
+      }
+
+      Gtk.Label {
+        css-classes: [
+          "dim-label",
+          "heading",
+        ];
+
+        label: _("Application");
+      }
+
+      Gtk.Label {
+        label: _("2 days ago");
+
+        css-classes: [
+          "dim-label",
+          "caption",
+        ];
+      }
+
+      margin-bottom: 6;
+    }
+
+    Gtk.Label {
+      css-classes: [
+        "heading",
+      ];
+
+      halign: start;
+      label: "Notification Title";
+      margin-bottom: 3;
+    }
+
+    Gtk.Label {
+      halign: fill;
+
+      css-classes: [
+        "",
+      ];
+
+      label: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.";
+      wrap: true;
+      wrap-mode: word;
+      max-width-chars: 20;
+      natural-wrap-mode: word;
+      ellipsize: end;
+      lines: 3;
+    }
+  }
+}

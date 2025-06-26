@@ -1,0 +1,28 @@
+using Gtk 4.0;
+using Adw 1;
+using Gio 2.0;
+
+template $NotificationsModule: Adw.Bin {
+  width-request: 400;
+  child: Gtk.ScrolledWindow {
+    hexpand: true;
+    max-content-width: 400;
+    css-classes: ["notifications-scrolled-window"];
+    child: Gtk.ListView view {
+      factory: Gtk.SignalListItemFactory {
+        bind => $on_bind() swapped;
+        setup => $on_setup() swapped;
+      };
+    };
+    hscrollbar-policy: never;
+    vscrollbar-policy: automatic;
+    overlay-scrolling: false;
+
+  };
+
+  hexpand: true;
+
+  css-classes: [
+    "notifications-module",
+  ];
+}

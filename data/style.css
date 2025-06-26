@@ -8,7 +8,9 @@
 .panel-menu-bin > menubutton > button {
         background-color: var(--window-bg-color);
 }
-
+.panel-menu-bin popover > * {
+    border-radius: calc(var(--window-radius) * 1.5);
+}
 .calendar * {
 }
 
@@ -22,4 +24,48 @@
     font-weight: bolder;
 	padding: 0.6em 0px 0.6em 0px;
 	border-radius: 2.2em;
+}
+
+
+
+.notifications-module > listview {
+    background-color: transparent;
+}
+
+.notifications-module > listview > row {
+    background-color: transparent;
+}
+.notifications-module .notification {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: calc(var(--window-radius));
+    padding: calc(var(--window-radius));
+    margin-bottom: 5px;
+    padding: 0.4rem;
+}
+
+.notification-top-button {
+    padding: 0px;
+    border-radius: 50%;
+}
+
+.notification.critical {
+    background: alpha(var(--accent-red), 0.04);
+    background-image: linear-gradient(to right, transparent, alpha(var(--accent-red), 0.2));
+    border: 1px solid var(--border-color);
+}
+
+.rounded-lg {
+    background-image: linear-gradient(transparent, var);
+}
+
+.rounded {
+    border-radius: calc(var(--window-radius));
+}
+
+.rounded-sm {
+    border-radius: calc(var(--window-radius) * 2 / 3);
+}
+
+.notifications-scrolled-window > * {
+    background-color: transparent;
 }

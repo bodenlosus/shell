@@ -9,7 +9,7 @@ mod inner {
         subclass::{prelude::*, widget::WidgetImpl},
     };
 
-    use crate::{notification_server, time};
+    use crate::{notification_server, notifications, time};
 
     use super::*;
     #[derive(CompositeTemplate, Default)]
@@ -22,6 +22,9 @@ mod inner {
 
         #[template_child(id="time-module")]
         pub time_mod: TemplateChild<time::TimeModule>,
+
+        #[template_child(id = "notifications-module")]
+        pub notifications_module: TemplateChild<notifications::NotificationsModule>,
 
         server: Option<notification_server::NotificationServer>,
     }

@@ -26,18 +26,19 @@ template $Center: Adw.Bin {
         popover: Gtk.Popover popover {
             has-arrow: false;
             height-request: 300;
+            width-request: 600;
 
             Gtk.Box {
+                hexpand: true;
                 orientation: horizontal;
-                Gtk.Box {
-                    Label {
-                      label: _("a");
-                    }
-                }
+                $NotificationsModule notifications-module {
+                } 
                 
                 Gtk.Separator {
                   orientation: vertical;
                   opacity: 0.5;
+                  margin-start: 7;
+                  margin-end: 7;
                 }
 
                 $TimeModule time-module {}

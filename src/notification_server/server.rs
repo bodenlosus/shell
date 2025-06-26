@@ -1,9 +1,10 @@
-use crate::notification_server::notification::Notification;
-use gio::glib::object::Cast;
+use crate::notification_server::notification::NotificationItem;
+use gio::glib::object::{Cast, CastNone};
+use gio::glib::property::PropertyGet;
+use gio::glib::Variant;
+use gio::prelude::ListModelExt;
+use gtk::gio::{self};
 use gtk::glib::{self};
-use gtk::{
-    gio::{self},
-};
 use std::{
     error::Error,
     sync::{
@@ -11,7 +12,6 @@ use std::{
         Arc,
     },
 };
-
 
 struct NotifyParams(
     String,
@@ -38,7 +38,7 @@ const NOTIFICATION_INTROSPECTION_XML: &str = include_str!("notifications-introsp
 impl Server {
     pub fn new() -> Self {
         Server {
-            store: gio::ListStore::new::<Notification>(),
+            store: gio::ListStore::new::<NotificationItem>(),
             next_id: Arc::new(0.into()),
         }
     }
@@ -47,8 +47,8 @@ impl Server {
         self.store.clone()
     }
 
-    pub fn connect_to_dbus(self) {
-        let s = Arc::new(self);
+    pub fn connect_to_dbus(&self) {
+        let s = self.clone();
         gio::bus_own_name(
             gio::BusType::Session,
             NOTIFICATION_DBUS_NAME,
@@ -58,8 +58,7 @@ impl Server {
             },
             move |conn, name| {
                 println!("Name acquired {conn:?} {name}");
-                let s = s.clone();
-                Self::register_dbus_interace(s, &conn).unwrap();
+                Self::register_dbus_interace(&s, &conn).unwrap();
             },
             |x, y| {
                 println!("Name lost {x:?} {y}");
@@ -79,16 +78,14 @@ impl Server {
             }
         }
     }
-    fn register_dbus_interace(
-        s: Arc<Self>,
-        conn: &gio::DBusConnection,
-    ) -> Result<(), Box<dyn Error>> {
+    fn register_dbus_interace(&self, conn: &gio::DBusConnection) -> Result<(), Box<dyn Error>> {
         let node_info = gio::DBusNodeInfo::for_xml(NOTIFICATION_INTROSPECTION_XML)?;
         let interface_info = node_info
             .interfaces()
             .first()
             .ok_or("could not retrieve interface info")?;
 
+        let s = self.clone();
         conn.register_object(NOTIFICATION_DBUS_PATH, interface_info)
             .method_call(
                 move |_connection,
@@ -98,7 +95,6 @@ impl Server {
                       method_name,
                       parameters,
                       invocation| {
-                    println!("Recieved method call: {} {:#?}", method_name, parameters);
                     let method_name = method_name.to_string();
                     let s = s.clone();
                     glib::spawn_future_local(async move {
@@ -116,6 +112,7 @@ impl Server {
         invocation: gio::DBusMethodInvocation,
         parameters: glib::Variant,
     ) {
+        println!("Method Name: {method_name}");
         match method_name.as_ref() {
             "GetServerInformation" => {
                 Self::on_get_server_info(invocation);
@@ -142,12 +139,40 @@ impl Server {
         invocation.return_value(Some(&info.into()));
     }
 
-    async fn on_notify(&self, parameters: &glib::Variant, invocation: gio::DBusMethodInvocation) {
-        let id = self.next_notification_id();
+    fn handle_insert_notification(&self, notification: &NotificationItem) -> u32 {
+        let replaces_id = notification.replaces_id();
+        // replaces id starts at 1 -> n_items == replaces_id -> last item
+        if replaces_id == 0 {
+            let id = self.next_notification_id();
+            notification.set_id(id);
+            self.store.append(notification);
+            return id;
+        }
 
-        match Notification::from_variant(id, parameters) {
+        println!("{replaces_id}");
+
+        let Some(old_store_id) = self
+            .store
+            .find_with_equal_func(|obj| Self::find_id(obj, replaces_id))
+        else {
+            let id = self.next_notification_id();
+            notification.set_id(id);
+            self.store.append(notification);
+            return id;
+        };
+
+        self.store.splice(old_store_id, 1, &[notification.clone()]);
+
+
+        replaces_id
+    }
+
+    async fn on_notify(&self, parameters: &glib::Variant, invocation: gio::DBusMethodInvocation) {
+        let dt = glib::DateTime::now_local().ok();
+        match NotificationItem::from_variant(None, parameters, dt) {
             Some(notification) => {
-                self.store.append(&notification);
+                let id = self.handle_insert_notification(&notification);
+                invocation.return_value(Some(&(id,).into()));
             }
             None => {
                 invocation.return_error(
@@ -158,7 +183,8 @@ impl Server {
         }
     }
     fn on_get_capabilities(invocation: gio::DBusMethodInvocation) {
-        invocation.return_value(Some(&vec!["actions", "body", "persistent"].into()));
+        let arr: Variant = (vec!["actions", "body", "persistent"],).into();
+        invocation.return_value(Some(&arr));
     }
     async fn on_close_notification(
         &self,
@@ -170,10 +196,10 @@ impl Server {
             return;
         };
 
-        let Some(id) = self.store.find_with_equal_func(|obj| {
-            obj.downcast_ref::<Notification>()
-                .map_or(false, |n| n.id() == id)
-        }) else {
+        let Some(id) = self
+            .store
+            .find_with_equal_func(|obj| Self::find_id(obj, id))
+        else {
             invocation.return_error(
                 gio::DBusError::Failed,
                 &format!("notification with id {id} not found"),
@@ -183,5 +209,10 @@ impl Server {
 
         self.store.remove(id);
         invocation.return_value(None);
+    }
+
+    fn find_id(obj: &glib::Object, id: u32) -> bool {
+        obj.downcast_ref::<NotificationItem>()
+            .map_or(false, |n| n.id() == id)
     }
 }

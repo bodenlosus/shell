@@ -1,44 +1,62 @@
 use adw::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{
-    glib::{self, clone, object::{IsA, ObjectExt}, Object},
+    glib::{
+        self, clone, object::{IsA, ObjectExt}, Object},
     CompositeTemplate,
 };
 
+use crate::notification_server;
+
 mod inner {
 
-    use gtk::prelude::ObjectExt;
+    use adw::subclass::bin::BinImpl;
+    use gio::glib::object::CastNone;
+    use gtk::prelude::{ListItemExt, ObjectExt};
     use std::cell::RefCell;
 
-    use gtk::glib::{self, derived_properties, Properties};
+    use gtk::glib::{self, derived_properties};
     use gtk::subclass::prelude::*;
+    use gtk::template_callbacks;
+
+    use crate::notification_display;
 
     use super::*;
-    #[derive(CompositeTemplate, Default, Properties)]
-    #[properties(wrapper_type = super::TimeModule)]
-    #[template(resource = "/shell/ui/time.ui")]
-    pub struct TimeModule {
-        #[template_child(id = "date-label")]
-        pub date_label: TemplateChild<gtk::Label>,
-
-        #[template_child(id = "weekday-label")]
-        pub weekday_label: TemplateChild<gtk::Label>,
-        
-        #[property(get, set)]
-        pub datetime: RefCell<Option<glib::DateTime>>,
+    #[derive(CompositeTemplate, Default)]
+    #[template(resource = "/shell/ui/notifications.ui")]
+    pub struct NotificationsModule {
+        #[template_child(id = "view")]
+        pub view: TemplateChild<gtk::ListView>,
     }
 
-    impl TimeModule {
-        fn setup_bindings(&self) {
-            self.obj().bind_time_to(&self.date_label.get(), "label", "%x"); 
-            self.obj().bind_time_to(&self.weekday_label.get(), "label", "%A"); 
+    #[template_callbacks]
+    impl NotificationsModule {
+        #[template_callback]
+        fn on_setup(&self, item: &gtk::ListItem) {
+            let child = notification_display::NotificationDisplay::new();
+            // let child = adw::Clamp::builder()
+            //     .child(&display)
+            //     .maximum_size(400)
+            //     .build();
+            item.set_child(Some(&child));
+        }
+        #[template_callback]
+        fn on_bind(&self, item: &gtk::ListItem) {
+
+            // let Some(child) = item.child().and_downcast::<adw::Clamp>() else {return;};
+            let Some(child) = item.child().and_downcast::<notification_display::NotificationDisplay>() else {return;};
+            let Some(item) = item.item().and_downcast::<notification_server::NotificationItem>() else {
+                return;
+            };
+
+            child.set_from_notification(&item); 
         }
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for TimeModule {
-        const NAME: &'static str = "TimeModule";
-        type Type = super::TimeModule;
-        type ParentType = gtk::Box;
+    impl ObjectSubclass for NotificationsModule {
+        const NAME: &'static str = "NotificationsModule";
+        type Type = super::NotificationsModule;
+        type ParentType = adw::Bin;
 
         fn new() -> Self {
             Self {
@@ -47,64 +65,39 @@ mod inner {
         }
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
+            klass.bind_template_callbacks();
         }
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
             obj.init_template();
         }
     }
-    #[derived_properties]
-    impl ObjectImpl for TimeModule {
+
+
+
+    impl ObjectImpl for NotificationsModule {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = &self.obj();
             let imp = obj.imp();
-            obj.setup_clock().expect("couldnt set datetime");
-            self.setup_bindings();
+            let server = notification_server::NotificationServer::new();
+            let model = gtk::NoSelection::new(Some(server.get_store()));
+            imp.view.set_model(Some(&model));
+            server.connect_to_dbus();
         }
     }
-    impl BoxImpl for TimeModule {}
-    impl WidgetImpl for TimeModule {}
+    impl BinImpl for NotificationsModule {}
+    impl WidgetImpl for NotificationsModule {}
 }
 
 glib::wrapper! {
-    pub struct TimeModule(ObjectSubclass<inner::TimeModule>)
-    @extends gtk::Widget, gtk::Box,
-    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Orientable;
+    pub struct NotificationsModule(ObjectSubclass<inner::NotificationsModule>)
+    @extends gtk::Widget, adw::Bin,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl TimeModule {
+impl NotificationsModule {
     pub fn new() -> Self {
         let obj = Object::new();
         obj
-    }
-
-    pub fn setup_clock(&self) -> Result<(), glib::BoolError> {
-        let dt = glib::DateTime::now_local()?;
-        self.set_datetime(dt);
-
-        let c = clone!(
-            #[strong(rename_to = tm)]
-            self,
-            move || {
-                let Ok(dt) = glib::DateTime::now_local() else {
-                    return glib::ControlFlow::Continue;
-                };
-                tm.set_datetime(dt);
-                glib::ControlFlow::Continue
-            }
-        );
-        glib::timeout_add_seconds_local(1, c);
-        let imp = self.imp();
-        
-        Ok(())
-    }
-    pub fn bind_time_to<W: IsA<Object>>(&self, obj: &W, property: &'static str, fmt: &'static str) {
-        let c = move |_, dt: Option<glib::DateTime>| {
-            return dt.and_then(|dt| dt.format(&fmt).ok())
-        };
-        self.bind_property("datetime", obj, property)
-        .sync_create()
-        .transform_to(c)
-        .build();
     }
 }

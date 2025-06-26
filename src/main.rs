@@ -1,9 +1,10 @@
 mod center;
 mod notification_server;
-mod notifications;
+mod notification_display;
 mod panel;
 mod time;
 mod utils;
+mod notifications;
 use adw::prelude::*;
 use gtk::{gio, CssProvider};
 use notification_server::NotificationServer;
@@ -32,15 +33,7 @@ fn load_css() {
 }
 
 fn build_ui(app: &adw::Application) {
-    let server = NotificationServer::new();
-    let store = server.get_store();
-    store.connect_items_changed(|list, position, removed ,added| {
-        let item = list.item(position);
-        println!("Item changed at position {}: {:?}", position, item);
-    });
-    let panel = panel::Panel::new(&app, Some(server.get_store()));
-    
-    server.connect_to_dbus();
+    let panel = panel::Panel::new(&app, None);
     
     panel.present();
 }

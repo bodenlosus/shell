@@ -16,6 +16,16 @@
       preprocess="xml-stripblanks"
       alias="time.ui"
     >ui/time.ui</file>
+    <file
+      compressed="true"
+      preprocess="xml-stripblanks"
+      alias="notification.ui"
+    >ui/notification.ui</file>
+    <file
+      compressed="true"
+      preprocess="xml-stripblanks"
+      alias="notifications.ui"
+    >ui/notifications.ui</file>
   </gresource>
   <gresource prefix="/styles">
     <file alias="style.css" compressed="true">style.css</file>

@@ -116,7 +116,7 @@ impl NotificationItem {
     }
 
     pub fn from_variant(id: Option<u32>, variant: &glib::Variant, datetime: Option<glib::DateTime>) -> Option<Self> {
-        // println!("NVARIANT: {variant:?}");
+        println!("NVARIANT: {variant:?}");
         variant
 
             .get::<(

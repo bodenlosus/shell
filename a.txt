@@ -1,9 +1,2 @@
 bus aquired
-Name lost Some(DBusConnection { inner: TypedObjectRef { inner: 0x55c0f7afe1a0, type: GDBusConnection } }) org.freedesktop.Notifications
-Name acquired DBusConnection { inner: TypedObjectRef { inner: 0x55c0f7afe1a0, type: GDBusConnection } } org.freedesktop.Notifications
-Method Name: Notify
-NVARIANT: Variant { ptr: 0x7f5758003e30, type: VariantTy { inner: "(susssasa{sv}i)" }, value: "('niri', uint32 0, 'file:///home/johannes/Pictures/Screenshots/2025-06-27%2018-24-06.png', 'Screenshot captured', 'You can paste the image from the clipboard.', @as [], {'urgency': <byte 0x01>, 'transient': <true>}, -1)" }
-Screenshot captured
-Method Name: Notify
-NVARIANT: Variant { ptr: 0x7f5758003e30, type: VariantTy { inner: "(susssasa{sv}i)" }, value: "('niri', uint32 0, 'file:///home/johannes/Pictures/Screenshots/2025-06-27%2018-24-08.png', 'Screenshot captured', 'You can paste the image from the clipboard.', @as [], {'transient': <true>, 'urgency': <byte 0x01>}, -1)" }
-Screenshot captured
+Name acquired DBusConnection { inner: TypedObjectRef { inner: 0x561fe1c121a0, type: GDBusConnection } } org.freedesktop.Notifications

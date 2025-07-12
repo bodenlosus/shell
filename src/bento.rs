@@ -13,26 +13,24 @@ mod inner {
 
     use super::*;
     #[derive(CompositeTemplate, Default)]
-    #[template(resource = "/shell/ui/center.ui")]
-    pub struct Center {
-        #[template_child(id = "time-label")]
-        pub time_label: TemplateChild<gtk::Label>,
-        #[template_child(id = "popover")]
-        pub popover: TemplateChild<gtk::Popover>,
-
+    #[template(resource = "/shell/ui/bento.ui")]
+    pub struct BentoGrid {
         #[template_child(id="time-module")]
         pub time_mod: TemplateChild<time::TimeModule>,
 
         #[template_child(id = "notifications-module")]
         pub notifications_module: TemplateChild<notifications::NotificationsModule>,
 
+        #[template_child(id = "grid")]
+        pub grid: TemplateChild<gtk::Grid>,
+
         server: Option<notification_server::NotificationServer>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for Center {
-        const NAME: &'static str = "Center";
-        type Type = super::Center;
+    impl ObjectSubclass for BentoGrid {
+        const NAME: &'static str = "BentoGrid";
+        type Type = super::BentoGrid;
         type ParentType = adw::Bin;
 
         fn new() -> Self {
@@ -48,26 +46,24 @@ mod inner {
         }
     }
 
-    impl ObjectImpl for Center {
+    impl ObjectImpl for BentoGrid {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = &self.obj();
             let imp = obj.imp();
-            imp.popover.set_offset(0, -10);
-            imp.time_mod.bind_time_to(&imp.time_label.get(), "label", "%x %X");
         }
     }
-    impl BinImpl for Center {}
-    impl WidgetImpl for Center {}
+    impl BinImpl for BentoGrid {}
+    impl WidgetImpl for BentoGrid {}
 }
 
 glib::wrapper! {
-    pub struct Center(ObjectSubclass<inner::Center>)
+    pub struct BentoGrid(ObjectSubclass<inner::BentoGrid>)
     @extends gtk::Widget, adw::Bin,
     @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl Center {
+impl BentoGrid {
     pub fn new() -> Self {
         let obj = Object::new();
         obj

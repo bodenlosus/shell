@@ -1,0 +1,31 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BentoGrid: Adw.Bin {
+    margin-bottom: 10;
+    margin-top: 10;
+    margin-start: 10;
+    margin-end: 10;
+    hexpand: true;
+    Gtk.Box {
+        spacing: 15;
+        hexpand: true;
+
+        Gtk.Grid grid {
+            css-classes: [
+                "bento-grid",
+            ];
+
+            row-spacing: 10;
+            column-spacing: 10;
+
+            Adw.Bin {
+                layout { 
+                }
+                $TimeModule time-module {}
+            }
+        }
+
+        $NotificationsModule notifications-module {}
+    }
+}

@@ -1,7 +1,6 @@
-use adw::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{
     glib::{
-        self, clone, object::{IsA, ObjectExt}, Object},
+        self, Object},
     CompositeTemplate,
 };
 
@@ -11,10 +10,10 @@ mod inner {
 
     use adw::subclass::bin::BinImpl;
     use gio::glib::object::CastNone;
-    use gtk::prelude::{ListItemExt, ObjectExt};
-    use std::cell::RefCell;
+    use gtk::prelude::ListItemExt;
+    
 
-    use gtk::glib::{self, derived_properties};
+    use gtk::glib::{self};
     use gtk::subclass::prelude::*;
     use gtk::template_callbacks;
 
@@ -50,6 +49,10 @@ mod inner {
 
             child.set_from_notification(&item); 
         }
+        #[template_callback]
+        fn on_activate(listview: gtk::ListView, position: u32) {
+            println!("{:?} {}", listview, position)
+        }
     }
 
     #[glib::object_subclass]
@@ -80,8 +83,9 @@ mod inner {
             let obj = &self.obj();
             let imp = obj.imp();
             let server = notification_server::NotificationServer::new();
-            let model = gtk::NoSelection::new(Some(server.get_store()));
-            imp.view.set_model(Some(&model));
+            let store = server.get_store();
+            // let model = gtk::NoSelection::new(Some(store));
+            // imp.view.set_model(Some(&model));
             server.connect_to_dbus();
         }
     }
@@ -99,5 +103,6 @@ impl NotificationsModule {
     pub fn new() -> Self {
         let obj = Object::new();
         obj
+
     }
 }

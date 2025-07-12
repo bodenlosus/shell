@@ -9,8 +9,8 @@
     <file
       compressed="true"
       preprocess="xml-stripblanks"
-      alias="center.ui"
-    >ui/center.ui</file>
+      alias="bento.ui"
+    >ui/bento.ui</file>
     <file
       compressed="true"
       preprocess="xml-stripblanks"

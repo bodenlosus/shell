@@ -1,10 +1,15 @@
 use crate::notification_server::notification::NotificationItem;
+use crate::notification_server::store::IDStore;
 use gio::glib::object::{Cast, CastNone};
 use gio::glib::property::PropertyGet;
 use gio::glib::Variant;
 use gio::prelude::ListModelExt;
 use gtk::gio::{self};
 use gtk::glib::{self};
+use std::cell::OnceCell;
+use std::ffi::os_str::Display;
+use std::fmt::write;
+use std::str::FromStr;
 use std::{
     error::Error,
     sync::{
@@ -27,7 +32,7 @@ struct NotifyParams(
 #[derive(Clone)]
 pub struct Server {
     store: gio::ListStore,
-    next_id: Arc<AtomicU32>,
+    connection: OnceCell<gio::DBusConnection>,
 }
 
 const NOTIFICATION_DBUS_NAME: &str = "org.freedesktop.Notifications";
@@ -35,15 +40,68 @@ const NOTIFICATION_DBUS_PATH: &str = "/org/freedesktop/Notifications";
 const NOTIFICATION_DBUS_INTERFACE: &str = "org.freedesktop.Notifications";
 const NOTIFICATION_INTROSPECTION_XML: &str = include_str!("notifications-introspect.xml");
 
+pub enum CloseReason {
+    Expired = 1,
+    Dismissed = 2,
+    Call = 3,
+    Undefined = 4,
+}
+
+#[derive(Debug)]
+pub enum ServerError {
+    ConnectionUninitialised,
+    GLibError(glib::Error),
+    UnspecifiedError(String),
+    NoInterfaceInfo,
+}
+
+impl From<glib::Error> for ServerError {
+    fn from(value: glib::Error) -> Self {
+        Self::GLibError(value)
+    }
+}
+
+impl From<String> for ServerError {
+    fn from(value: String) -> Self {
+        Self::UnspecifiedError(value)
+    }
+}
+impl From<&str> for ServerError {
+    fn from(value: &str) -> Self {
+        Self::UnspecifiedError(value.to_string())
+    }
+}
+impl std::fmt::Display for ServerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::ConnectionUninitialised => "ConnectionError",
+            Self::GLibError(_) => "GLibError",
+            Self::UnspecifiedError(s) => &format!("UnspecifiedError: {s}"),
+            Self::NoInterfaceInfo => "NoInterfaceInfo",
+        };
+
+        write!(f, "{s}")
+    }
+}
+
+impl std::error::Error for ServerError {
+    fn cause(&self) -> Option<&dyn Error> {
+        match self {
+            Self::GLibError(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
 impl Server {
     pub fn new() -> Self {
         Server {
-            store: gio::ListStore::new::<NotificationItem>(),
-            next_id: Arc::new(0.into()),
+            store: IDStore::new::<NotificationItem>(),
+            connection: OnceCell::new(),
         }
     }
 
-    pub fn get_store(&self) -> gio::ListStore {
+    pub fn get_store(&self) -> IDStore {
         self.store.clone()
     }
 
@@ -58,32 +116,20 @@ impl Server {
             },
             move |conn, name| {
                 println!("Name acquired {conn:?} {name}");
-                Self::register_dbus_interace(&s, &conn).unwrap();
+                Self::register_dbus_interface(&s, &conn).unwrap();
+                let _ = s.connection.set(conn);
             },
             |x, y| {
                 println!("Name lost {x:?} {y}");
             },
         );
     }
-    fn next_notification_id(&self) -> u32 {
-        loop {
-            let current = self.next_id.load(Ordering::Relaxed);
-            let new = current.wrapping_add(1).max(1);
-
-            if let Ok(_) =
-                self.next_id
-                    .compare_exchange(current, new, Ordering::Relaxed, Ordering::Relaxed)
-            {
-                return new;
-            }
-        }
-    }
-    fn register_dbus_interace(&self, conn: &gio::DBusConnection) -> Result<(), Box<dyn Error>> {
+    fn register_dbus_interface(&self, conn: &gio::DBusConnection) -> Result<(), ServerError> {
         let node_info = gio::DBusNodeInfo::for_xml(NOTIFICATION_INTROSPECTION_XML)?;
         let interface_info = node_info
             .interfaces()
             .first()
-            .ok_or("could not retrieve interface info")?;
+            .ok_or(ServerError::NoInterfaceInfo)?;
 
         let s = self.clone();
         conn.register_object(NOTIFICATION_DBUS_PATH, interface_info)
@@ -142,27 +188,17 @@ impl Server {
     fn handle_insert_notification(&self, notification: &NotificationItem) -> u32 {
         let replaces_id = notification.replaces_id();
         // replaces id starts at 1 -> n_items == replaces_id -> last item
+
+        println!("handling insert");
         if replaces_id == 0 {
-            let id = self.next_notification_id();
+            println!("trying to push");
+            let (id, prev) = self.store.push(notification.clone());
             notification.set_id(id);
-            self.store.append(notification);
             return id;
         }
-
-        println!("{replaces_id}");
-
-        let Some(old_store_id) = self
-            .store
-            .find_with_equal_func(|obj| Self::find_id(obj, replaces_id))
-        else {
-            let id = self.next_notification_id();
-            notification.set_id(id);
-            self.store.append(notification);
-            return id;
-        };
-
-        self.store.splice(old_store_id, 1, &[notification.clone()]);
-
+        
+        println!("trying to insert");
+        self.store.set(replaces_id, notification.clone());
 
         replaces_id
     }
@@ -182,9 +218,39 @@ impl Server {
             }
         }
     }
+
+    pub fn send_closed(&self, id: u32, reason: CloseReason) -> Result<(), ServerError> {
+        self.send_signal("NotificationClosed", &(id, reason as u32).into())?;
+        Ok(())
+    }
     fn on_get_capabilities(invocation: gio::DBusMethodInvocation) {
-        let arr: Variant = (vec!["actions", "body", "persistent"],).into();
+        let arr: Variant = (vec![
+            "action-icons",
+            "actions",
+            "body",
+            "body-hyperlinks",
+            "persistent",
+        ],)
+            .into();
         invocation.return_value(Some(&arr));
+    }
+    fn send_signal(
+        &self,
+        signal: impl AsRef<str>,
+        args: &glib::Variant,
+    ) -> Result<(), ServerError> {
+        let conn = self
+            .connection
+            .get()
+            .ok_or(ServerError::ConnectionUninitialised)?;
+        conn.emit_signal(
+            Some(NOTIFICATION_DBUS_NAME),
+            NOTIFICATION_DBUS_PATH,
+            NOTIFICATION_DBUS_INTERFACE,
+            signal.as_ref(),
+            Some(args),
+        )?;
+        Ok(())
     }
     async fn on_close_notification(
         &self,
@@ -196,10 +262,9 @@ impl Server {
             return;
         };
 
-        let Some(id) = self
-            .store
-            .find_with_equal_func(|obj| Self::find_id(obj, id))
-        else {
+        let prev = self.store.remove(id);
+
+        if prev.is_none() {
             invocation.return_error(
                 gio::DBusError::Failed,
                 &format!("notification with id {id} not found"),
@@ -207,12 +272,10 @@ impl Server {
             return;
         };
 
-        self.store.remove(id);
         invocation.return_value(None);
-    }
 
-    fn find_id(obj: &glib::Object, id: u32) -> bool {
-        obj.downcast_ref::<NotificationItem>()
-            .map_or(false, |n| n.id() == id)
+        if let Err(e) = self.send_closed(id, CloseReason::Call) {
+            eprintln!("Error occured sending close signal for notification: {e}")
+        };
     }
 }

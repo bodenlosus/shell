@@ -1,4 +1,4 @@
-mod center;
+mod bento;
 mod notification_server;
 mod notification_display;
 mod panel;
@@ -7,7 +7,6 @@ mod utils;
 mod notifications;
 use adw::prelude::*;
 use gtk::{gio, CssProvider};
-use notification_server::NotificationServer;
 const APP_ID: &'static str = "io.github.johannes.shell";
 const DATA_DIR: &'static str = "/home/johannes/bracket/data/";
 

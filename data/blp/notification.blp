@@ -6,80 +6,76 @@ template $NotificationDisplay: Gtk.Box {
     "notification",
   ];
 
-  orientation: vertical;
+  hexpand: true;
+  orientation: horizontal;
   spacing: 8;
   overflow: hidden;
 
   Gtk.Box {
-    margin-start: 16;
-    orientation: horizontal;
-    hexpand: true;
-    spacing: 4;
-
-    Gtk.Label app-label {
-      hexpand: true;
-      halign: start;
-
-      css-classes: [
-        "dim-label",
-        "heading",
-      ];
-    }
-
-    Gtk.Label time-label {
-      halign: end;
-
-      css-classes: [
-        "dim-label",
-        "caption",
-      ];
-    }
-
-    Gtk.Button {
-      halign: end;
-
-      css-classes: [
-        "raised",
-        "notification-top-button",
-      ];
-
-      // action-name: "app.close-notification";
-      icon-name: "window-close-symbolic";
-      tooltip-text: _("Close notification");
-    }
-  }
-
-  Gtk.Box content {
-    orientation: horizontal;
-    // hexpand: true;
-    halign: start;
-    spacing: 8;
+    margin-bottom: 12;
+    margin-end: 8;
+    margin-start: 8;
+    valign: center;
+    spacing: 6;
+    orientation: vertical;
 
     Gtk.Box {
-      // hexpand: true;
-      margin-bottom: 12;
-      margin-end: 8;
-      margin-start: 8;
-      valign: center;
-      spacing: 6;
-      orientation: vertical;
-      Gtk.Label title-label {
+      orientation: horizontal;
+      hexpand: true;
+      spacing: 4;
+
+      Gtk.Label app-label {
+        hexpand: true;
+        halign: start;
+
         css-classes: [
           "dim-label",
-          "title",
           "heading",
         ];
-
-        justify: left;
-        halign: start;
-        ellipsize: end;
       }
 
-      Gtk.Label body-label {
-        justify: left;
-        halign: start;
-        ellipsize: end;
+      Gtk.Box {
+        orientation: horizontal;
+        halign: end;
+        spacing: 6;
+        Gtk.Label time-label {
+
+          css-classes: [
+            "dim-label",
+            "caption",
+          ];
+        }
+
+        Gtk.Button {
+
+          css-classes: [
+            "raised",
+            "notification-top-button",
+          ];
+
+          // action-name: "app.close-notification";
+          icon-name: "window-close-symbolic";
+          tooltip-text: _("Close notification");
+        }
       }
+    }
+
+    Gtk.Label title-label {
+      css-classes: [
+        "dim-label",
+        "title",
+        "heading",
+      ];
+
+      justify: left;
+      halign: start;
+      ellipsize: end;
+    }
+
+    Gtk.Label body-label {
+      justify: left;
+      halign: start;
+      ellipsize: end;
     }
   }
 }

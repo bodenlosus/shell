@@ -1,9 +1,12 @@
 using Gtk 4.0;
 using Adw 1;
-template $Panel : Adw.ApplicationWindow {
-    height-request: 30;
-    css-classes: ["panel"];
-    content: Gtk.CenterBox {
-      center-widget: $Center center {};
-    };
+
+template $Panel: Adw.ApplicationWindow {
+  
+  css-classes: [
+    "panel",
+  ];
+  hexpand: true;
+
+  content: $BentoGrid bento {};
 }

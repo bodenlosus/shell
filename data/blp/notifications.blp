@@ -5,10 +5,10 @@ using Gio 2.0;
 template $NotificationsModule: Adw.Bin {
   width-request: 400;
   child: Gtk.ScrolledWindow {
-    hexpand: true;
     max-content-width: 400;
     css-classes: ["notifications-scrolled-window"];
     child: Gtk.ListView view {
+      activate => $on_activate();
       factory: Gtk.SignalListItemFactory {
         bind => $on_bind() swapped;
         setup => $on_setup() swapped;
@@ -19,8 +19,6 @@ template $NotificationsModule: Adw.Bin {
     overlay-scrolling: false;
 
   };
-
-  hexpand: true;
 
   css-classes: [
     "notifications-module",

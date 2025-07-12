@@ -1,0 +1,303 @@
+   Compiling shell v0.1.0 (/home/johannes/shell)
+warning: unused import: `prelude::PopoverExt`
+ --> src/bento.rs:8:9
+  |
+8 |         prelude::PopoverExt,
+  |         ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `CastNone` and `Cast`
+ --> src/notification_server/server.rs:3:25
+  |
+3 | use gio::glib::object::{Cast, CastNone};
+  |                         ^^^^  ^^^^^^^^
+
+warning: unused import: `gio::prelude::ListModelExt`
+ --> src/notification_server/server.rs:6:5
+  |
+6 | use gio::prelude::ListModelExt;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::ffi::os_str::Display`
+  --> src/notification_server/server.rs:10:5
+   |
+10 | use std::ffi::os_str::Display;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::fmt::write`
+  --> src/notification_server/server.rs:11:5
+   |
+11 | use std::fmt::write;
+   |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `std::str::FromStr`
+  --> src/notification_server/server.rs:12:5
+   |
+12 | use std::str::FromStr;
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Arc`, `AtomicU32`, and `Ordering`
+  --> src/notification_server/server.rs:16:18
+   |
+16 |         atomic::{AtomicU32, Ordering},
+   |                  ^^^^^^^^^  ^^^^^^^^
+17 |         Arc,
+   |         ^^^
+
+warning: unused import: `gdk_pixbuf::Pixbuf`
+ --> src/notification_server/store.rs:2:5
+  |
+2 | use gdk_pixbuf::Pixbuf;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `UriFlags`, `prelude::FileExt`, and `variant::StaticVariantType`
+ --> src/notification_server/store.rs:4:48
+  |
+4 |     glib::{object::IsA, property::PropertyGet, variant::StaticVariantType, UriFlags},
+  |                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^
+5 |     prelude::FileExt,
+  |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `gio::glib::object::IsA`
+  --> src/notification_server/store.rs:12:9
+   |
+12 |     use gio::glib::object::IsA;
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `SignalId` and `Signal`
+  --> src/notification_server/store.rs:14:31
+   |
+14 |     use gio::glib::subclass::{Signal, SignalId};
+   |                               ^^^^^^  ^^^^^^^^
+
+warning: unused import: `gio::glib::types::StaticType`
+  --> src/notification_server/store.rs:15:9
+   |
+15 |     use gio::glib::types::StaticType;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `OnceCell`
+  --> src/notification_server/store.rs:20:27
+   |
+20 |     use std::cell::{Cell, OnceCell, RefCell};
+   |                           ^^^^^^^^
+
+warning: unused import: `HashSet`
+  --> src/notification_server/store.rs:21:37
+   |
+21 |     use std::collections::{HashMap, HashSet};
+   |                                     ^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+  --> src/notification_server/store.rs:22:9
+   |
+22 |     use std::rc::Rc;
+   |         ^^^^^^^^^^^
+
+warning: unused import: `crate::notification_server::NotificationItem`
+  --> src/notification_server/store.rs:24:9
+   |
+24 |     use crate::notification_server::NotificationItem;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unreachable expression
+   --> src/notification_server/store.rs:131:9
+    |
+130 |         panic!();
+    |         -------- any code following this expression is unreachable
+131 |         self.imp().push(obj.into())
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable expression
+    |
+    = note: `#[warn(unreachable_code)]` on by default
+
+warning: use of deprecated associated constant `gio::ApplicationFlags::FLAGS_NONE`: Since 2.74
+  --> src/main.rs:16:74
+   |
+16 |     let app = adw::Application::new(Some(APP_ID), gio::ApplicationFlags::FLAGS_NONE);
+   |                                                                          ^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: unused import: `property::PropertyGet`
+ --> src/notification_server/notification.rs:5:9
+  |
+5 |         property::PropertyGet,
+  |         ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gio::glib::property::PropertyGet`
+ --> src/notification_server/server.rs:4:5
+  |
+4 | use gio::glib::property::PropertyGet;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `property::PropertyGet`
+ --> src/notification_server/store.rs:4:25
+  |
+4 |     glib::{object::IsA, property::PropertyGet, variant::StaticVariantType, UriFlags},
+  |                         ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gio::prelude::AppInfoExt`
+ --> src/notification_display.rs:2:5
+  |
+2 | use gio::prelude::AppInfoExt;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk::prelude::ObjectExt`
+  --> src/notification_display.rs:18:9
+   |
+18 |     use gtk::prelude::ObjectExt;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `object::ObjectExt`
+ --> src/notification_display.rs:7:9
+  |
+7 |         object::ObjectExt,
+  |         ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gdk::prelude::TextureExt`
+ --> src/notification_display.rs:4:5
+  |
+4 |     gdk::prelude::TextureExt,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `imp`
+  --> src/bento.rs:53:17
+   |
+53 |             let imp = obj.imp();
+   |                 ^^^ help: if this is intentional, prefix it with an underscore: `_imp`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `channels`
+   --> src/notification_server/notification.rs:214:64
+    |
+214 |     let (width, height, rowstride, has_alpha, bits_per_sample, channels, data) = bytes;
+    |                                                                ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_channels`
+
+warning: unused variable: `prev`
+   --> src/notification_server/server.rs:192:22
+    |
+192 |             let (id, prev) = self.store.push(notification.clone());
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_prev`
+
+warning: unreachable expression
+  --> src/notification_server/store.rs:27:14
+   |
+27 |     #[derive(Properties)]
+   |              ^^^^^^^^^^
+   |              |
+   |              unreachable expression
+   |              any code following this expression is unreachable
+   |
+note: this expression has type `store::inner::DerivedPropertiesEnum`, which is uninhabited
+  --> src/notification_server/store.rs:27:14
+   |
+27 |     #[derive(Properties)]
+   |              ^^^^^^^^^^
+   = note: this warning originates in the derive macro `Properties` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused variable: `obj`
+   --> src/notification_server/store.rs:128:24
+    |
+128 |     pub fn push(&self, obj: impl IsA<Object>) -> (u32, Option<Object>) {
+    |                        ^^^ help: if this is intentional, prefix it with an underscore: `_obj`
+
+warning: unreachable expression
+  --> src/notification_display.rs:25:42
+   |
+25 |     #[derive(CompositeTemplate, Default, Properties)]
+   |                                          ^^^^^^^^^^
+   |                                          |
+   |                                          unreachable expression
+   |                                          any code following this expression is unreachable
+   |
+note: this expression has type `notification_display::inner::DerivedPropertiesEnum`, which is uninhabited
+  --> src/notification_display.rs:25:42
+   |
+25 |     #[derive(CompositeTemplate, Default, Properties)]
+   |                                          ^^^^^^^^^^
+   = note: this warning originates in the derive macro `Properties` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused variable: `imp`
+  --> src/notification_display.rs:74:17
+   |
+74 |             let imp = obj.imp();
+   |                 ^^^ help: if this is intentional, prefix it with an underscore: `_imp`
+
+warning: unused variable: `store`
+  --> src/panel.rs:74:40
+   |
+74 |     pub fn new(app: &adw::Application, store: Option<gio::ListStore>) -> Self {
+   |                                        ^^^^^ help: if this is intentional, prefix it with an underscore: `_store`
+
+warning: unused variable: `imp`
+  --> src/time.rs:59:17
+   |
+59 |             let imp = obj.imp();
+   |                 ^^^ help: if this is intentional, prefix it with an underscore: `_imp`
+
+warning: unused variable: `imp`
+  --> src/time.rs:96:13
+   |
+96 |         let imp = self.imp();
+   |             ^^^ help: if this is intentional, prefix it with an underscore: `_imp`
+
+warning: constant `DATA_DIR` is never used
+  --> src/main.rs:11:7
+   |
+11 | const DATA_DIR: &'static str = "/home/johannes/bracket/data/";
+   |       ^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field `server` is never read
+  --> src/bento.rs:27:9
+   |
+17 |     pub struct BentoGrid {
+   |                --------- field in this struct
+...
+27 |         server: Option<notification_server::NotificationServer>,
+   |         ^^^^^^
+
+warning: struct `NotifyParams` is never constructed
+  --> src/notification_server/server.rs:21:8
+   |
+21 | struct NotifyParams(
+   |        ^^^^^^^^^^^^
+
+warning: variants `Expired`, `Dismissed`, and `Undefined` are never constructed
+  --> src/notification_server/server.rs:44:5
+   |
+43 | pub enum CloseReason {
+   |          ----------- variants in this enum
+44 |     Expired = 1,
+   |     ^^^^^^^
+45 |     Dismissed = 2,
+   |     ^^^^^^^^^
+46 |     Call = 3,
+47 |     Undefined = 4,
+   |     ^^^^^^^^^
+
+warning: method `set_server` is never used
+  --> src/panel.rs:80:8
+   |
+73 | impl Panel {
+   | ---------- method in this implementation
+...
+80 |     fn set_server(&self, store: Option<gio::ListStore>) {
+   |        ^^^^^^^^^^
+
+warning: unused `Result` that must be used
+  --> src/panel.rs:82:9
+   |
+82 |         inner.notification_store.set(store);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+   |
+82 |         let _ = inner.notification_store.set(store);
+   |         +++++++
+

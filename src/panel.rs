@@ -1,13 +1,11 @@
 use adw::subclass::prelude::{ObjectSubclassExt, ObjectSubclassIsExt};
-use gio::Notification;
 use gtk::{gio, glib::{self, Object}, prelude::GtkWindowExt};
 
-use crate::notification_server::NotificationServer;
 
 mod inner { 
     use std::cell::OnceCell;
 
-    use crate::center::Center;
+    use crate::bento::BentoGrid;
 
     use super::*;
 
@@ -19,8 +17,8 @@ mod inner {
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/shell/ui/panel.ui")]
     pub struct Panel {
-        #[template_child(id="center")]
-        pub center: TemplateChild<Center>,
+        #[template_child(id="bento")]
+        pub center: TemplateChild<BentoGrid>,
         pub notification_store: OnceCell<Option<gio::ListStore>>
     }
 
@@ -54,8 +52,8 @@ mod inner {
             obj.set_anchor(Edge::Bottom, true);
             obj.set_anchor(Edge::Left, true);
             obj.set_anchor(Edge::Right, true);
-            obj.set_layer(Layer::Top);
-            obj.auto_exclusive_zone_enable();
+            obj.set_anchor(Edge::Top, true);
+            obj.set_layer(Layer::Bottom);
 
         }
     }

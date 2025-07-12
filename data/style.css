@@ -1,8 +1,5 @@
 .panel {
-    border-radius: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    /* background-color: var(--window-bg-color); */
 }
 
 .panel-menu-bin > menubutton > button {
@@ -26,6 +23,9 @@
 	border-radius: 2.2em;
 }
 
+.bg-window {
+    background-color: var(--window-bg-color);
+}
 
 
 .notifications-module > listview {
@@ -36,7 +36,7 @@
     background-color: transparent;
 }
 .notifications-module .notification {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--window-bg-color);
     border-radius: calc(var(--window-radius));
     padding: calc(var(--window-radius));
     margin-bottom: 5px;
@@ -55,7 +55,7 @@
 }
 
 .rounded-lg {
-    background-image: linear-gradient(transparent, var);
+    /* background-image: linear-gradient(transparent, var); */
 }
 
 .rounded {
@@ -68,4 +68,12 @@
 
 .notifications-scrolled-window > * {
     background-color: transparent;
+}
+
+.bento-grid > *{
+    background-color: red;
+    padding: 10px;
+
+    border-radius: var(--window-radius);
+    background-color: var(--window-bg-color);
 }

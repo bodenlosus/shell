@@ -1,0 +1,41 @@
+using Gtk 4.0;
+
+Grid my_grid {
+  Button button1 {
+    label: "Button 1";
+
+    layout {
+      column: "0";
+      row: "0";
+    }
+  }
+
+  Button button2 {
+    label: "Button 2";
+
+    layout {
+      column: "1";
+      row: "0";
+    }
+  }
+
+  Button button3 {
+    label: "Button 3";
+
+    layout {
+      column: "2";
+      row: "0";
+      row-span: "2";
+    }
+  }
+
+  Button button4 {
+    label: "Button 4";
+
+    layout {
+      column: "0";
+      row: "1";
+      column-span: "2";
+    }
+  }
+}

@@ -1,7 +1,12 @@
-use std::collections::HashMap;
 
-use gio::glib::{
-    property::PropertyGet, types::StaticType, value::{FromValue, ToValue}, variant::StaticVariantType,
+use gdk_pixbuf::Pixbuf;
+use gio::{
+    glib::{
+        property::PropertyGet,
+        variant::StaticVariantType,
+        UriFlags,
+    },
+    prelude::FileExt,
 };
 use gtk::glib::{self, Object};
 
@@ -115,10 +120,13 @@ impl NotificationItem {
         }
     }
 
-    pub fn from_variant(id: Option<u32>, variant: &glib::Variant, datetime: Option<glib::DateTime>) -> Option<Self> {
-        println!("NVARIANT: {variant:?}");
+    pub fn from_variant(
+        id: Option<u32>,
+        variant: &glib::Variant,
+        datetime: Option<glib::DateTime>,
+    ) -> Option<Self> {
+        // println!("NVARIANT: {variant:?}");
         variant
-
             .get::<(
                 String,
                 u32,
@@ -158,6 +166,63 @@ impl NotificationItem {
     pub fn get_hints(&self) -> NotificationHints {
         self.hints().into()
     }
+
+    pub fn get_image(&self) -> Option<gtk::gdk_pixbuf::Pixbuf> {
+        if let Some(image) = pic_pixbuf_from_hints(self.get_hints()) {
+            return Some(image);
+        }
+        let app_icon = self.app_icon();
+        if glib::Uri::is_valid(&app_icon, UriFlags::ENCODED_PATH).is_ok() {
+            let pixbuf = gio::File::for_uri(&app_icon)
+                .path()
+                .and_then(|p| gtk::gdk_pixbuf::Pixbuf::from_file(p).ok());
+            if pixbuf.is_some() {
+                return pixbuf;
+            }
+        }
+
+        None
+    }
+    pub fn get_image_square(&self) -> Option<Pixbuf> {
+        let img = self.get_image()?;
+
+        let w = img.width();
+        let h = img.height();
+        let s = w.min(h);
+
+        let x = (w - s) / 2;
+        let y = (h - s) / 2;
+
+        Some(img.new_subpixbuf(x, y, s, s))
+    }
+}
+
+pub fn pic_pixbuf_from_hints(hints: NotificationHints) -> Option<gdk_pixbuf::Pixbuf> {
+    let NotificationHints {
+        image_data,
+        image_path,
+        icon_data,
+        ..
+    } = hints;
+    image_data
+        .and_then(pixbuf_from_image_bytes)
+        .or_else(|| image_path.and_then(|path| gdk_pixbuf::Pixbuf::from_file(path).ok()))
+        .or_else(|| icon_data.and_then(pixbuf_from_image_bytes))
+}
+
+fn pixbuf_from_image_bytes(bytes: NotificationImageData) -> Option<gdk_pixbuf::Pixbuf> {
+    let (width, height, rowstride, has_alpha, bits_per_sample, channels, data) = bytes;
+    let data = glib::Bytes::from_owned(data);
+    let colorspace = gdk_pixbuf::Colorspace::Rgb;
+    Some(gdk_pixbuf::Pixbuf::from_bytes(
+        &data,
+        colorspace,
+        has_alpha,
+        bits_per_sample,
+        width,
+        height,
+        rowstride,
+    ))
 }
 
 #[derive(Debug)]

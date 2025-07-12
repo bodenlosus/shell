@@ -49,7 +49,8 @@ mod inner {
 
     implement_next_for_nonzero!(NonZeroU32);
 
-    struct Node<K, T> {
+    #[derive(Clone)]
+    struct Node<K, T: Clone> {
         prev: Option<K>,
         next: Option<K>,
         value: T,
@@ -65,15 +66,16 @@ mod inner {
         NextNodeNotFound,
     }
 
-    struct Store<K: Key, T> {
+    struct Store<K: Key, T: Clone> {
         items: HashMap<K, Node<K, T>>,
         free_ids: Vec<K>,
         id: K,
         head: Option<K>,
         tail: Option<K>,
+        cache: Option<(usize, K)>,
     }
 
-    impl<K: Key, T> Store<K, T> {
+    impl<K: Key, T: Clone> Store<K, T> {
         pub fn new() -> Self {
             Self {
                 items: HashMap::new(),
@@ -81,6 +83,7 @@ mod inner {
                 id: K::START,
                 head: None,
                 tail: None,
+                cache: None,
             }
         }
         pub fn next_id(&mut self) -> K {
@@ -105,7 +108,7 @@ mod inner {
                 self.initialize(item, id);
                 return id;
             };
-            
+
             self.items.insert(
                 id,
                 Node {
@@ -132,7 +135,7 @@ mod inner {
                     value: item,
                 },
             );
-            self.tail = Some(id);
+            self.head = Some(id);
             id
         }
         pub fn replace(&mut self, id: &K, item: T) -> Option<T> {
@@ -155,35 +158,52 @@ mod inner {
                     let [pn, nn] = self.items.get_disjoint_mut([&prev, &next]);
                     let pn = pn.ok_or(StoreError::PrevNodeNotFound)?;
                     let nn = nn.ok_or(StoreError::NextNodeNotFound)?;
-                    
+
                     pn.next = Some(next);
                     nn.prev = Some(prev);
-
                 }
                 // Node is tail
-                Node { prev: Some(prev), next: None, .. } => {
+                Node {
+                    prev: Some(prev),
+                    next: None,
+                    ..
+                } => {
                     if Some(*id) != self.tail {
                         return Err(StoreError::Malformed);
                     }
 
-                    let pn = self.items.get_mut(&prev).ok_or(StoreError::PrevNodeNotFound)?;
+                    let pn = self
+                        .items
+                        .get_mut(&prev)
+                        .ok_or(StoreError::PrevNodeNotFound)?;
                     pn.next = None;
-                    
+
                     self.tail = Some(prev);
                 }
                 // node is head
-                Node { prev: None, next: Some(next), .. } => {
+                Node {
+                    prev: None,
+                    next: Some(next),
+                    ..
+                } => {
                     if Some(*id) != self.head {
                         return Err(StoreError::Malformed);
                     }
 
-                    let nn = self.items.get_mut(&next).ok_or(StoreError::NextNodeNotFound)?;
+                    let nn = self
+                        .items
+                        .get_mut(&next)
+                        .ok_or(StoreError::NextNodeNotFound)?;
                     nn.prev = None;
-                    
+
                     self.head = Some(next);
                 }
 
-                Node {prev: None, next: None, ..} => {
+                Node {
+                    prev: None,
+                    next: None,
+                    ..
+                } => {
                     return Err(StoreError::Malformed);
                 }
             };
@@ -193,8 +213,30 @@ mod inner {
             Ok(Some(node.value))
         }
 
+        fn try_cache_lookup(&self, pos: usize) -> Option<&Node<K, T>> {
+            let (cache_pos, cache_id) = self.cache?;
+            let cached_node = self.items.get(&cache_id);
+
+            if pos == cache_pos {
+                return cached_node;
+            }
+            if pos > cache_pos {
+                return self.items.get(&cached_node?.next?);
+            }
+            if pos < cache_pos {
+                return self.items.get(&cached_node?.prev?);
+            }
+
+            None
+        }
+
         pub fn nth_item(&self, pos: usize) -> Option<&T> {
             //TODO: use caching adapted to the lookup pattern of the SelectionModel, use end if nearer
+
+            if let Some(node) = self.try_cache_lookup(pos) {
+                return Some(&node.value);
+            }
+
             let len = self.items.len();
 
             if pos >= len {
@@ -206,7 +248,6 @@ mod inner {
             }
 
             return self.nth_item_from_tail(pos, len);
-
         }
         fn nth_item_from_head(&self, pos: usize) -> Option<&T> {
             let mut id = self.head?;
